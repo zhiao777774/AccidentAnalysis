@@ -1,0 +1,472 @@
+{% extends 'base.html' %}
+{% block content%}
+
+<script src="{{ url_for("static", filename="js/utils.js") }}"></script>
+
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4 mt-3">
+  <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+  <!--
+  <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+      class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+  -->
+</div>
+
+<!-- Content Row -->
+<div class="row">
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-info shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Risk
+            </div>
+            <div class="row no-gutters align-items-center">
+              <div class="col-auto">
+                <div id="risk-prob" class="h5 mb-0 mr-3 font-weight-bold text-gray-800">0%</div>
+              </div>
+              <div class="col">
+                <div class="progress progress-sm mr-2">
+                  <div id="risk-bar" class="progress-bar bg-info" role="progressbar" style="width: 0%" aria-valuenow="50"
+                    aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-pen fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-primary shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+              TMA1</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dataSize[0] }}筆</div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-table fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+              TMA2</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dataSize[1] }}筆</div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-table fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-warning shadow h-100 py-2">
+      <div class="card-body">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+              TMA3</div>
+            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ dataSize[2] }}筆</div>
+          </div>
+          <div class="col-auto">
+            <i class="fas fa-table fa-2x text-gray-300"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Content Row -->
+<div class="row">
+  <div class="col-xl-4 col-lg-5">
+    <div class="card shadow mb-4">
+      <!-- Card Header -->
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">風險評估</h6>
+      </div>
+      <!-- Card Body -->
+      <div class="card-body">
+        <div>
+          <div class="form-group row">
+            <div class="form-group" style="margin-left: 15px;">
+              <label for="eval-sex">性別:</label>
+              <select class="form-control" id="eval-sex">
+                <option value="0">男</option>
+                <option value="1">女</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-left: 30px;">
+              <label for="eval-age">年齡:</label>
+              <select class="form-control" id="eval-age">
+                <option value="0">18~29</option>
+                <option value="1">30~39</option>
+                <option value="2">40~49</option>
+                <option value="3">50~59</option>
+                <option value="4">60~69</option>
+                <option value="5">70以上</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-left: 30px;">
+              <label for="eval-car-type">交通工具:</label>
+              <select class="form-control" id="eval-car-type">
+                <option value="0">機車/腳踏車</option>
+                <option value="1">小型車</option>
+                <option value="2">大型車</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="eval-country">縣市:</label>
+            <select class="form-control" id="eval-country">
+              <option value="0">一般縣市</option>
+              <option value="1">直轄市</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="eval-period">時段:</label>
+            <select class="form-control" id="eval-period">
+              <option value="0">日間</option>
+              <option value="1">晚間</option>
+              <option value="2">夜間</option>
+            </select>
+          </div>
+          <button id="btn-evaluate" type="submit" class="btn btn-primary btn-sm">評估</button>
+          <label id="risk" style="display: none; margin-left: 20px; font-weight: bold;"></label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-8 col-lg-7">
+    <div class="card shadow mb-4">
+      <!-- Card Header - Dropdown -->
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">意外事故死亡受傷發生機率圖</h6>
+        <div class="dropdown no-arrow">
+          <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+            <div class="dropdown-header">功能</div>
+            <a class="dropdown-item save" href="#" data-canvas="risk-prob-areaChart" data-filename="意外事故死亡受傷發生機率圖">保存圖檔</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card Body -->
+      <div class="card-body">
+        <div class="chart-area">
+          <canvas id="risk-prob-areaChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xl-12 col-lg-12">
+    <div class="card shadow mb-4">
+      <!-- Card Header - Dropdown -->
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">意外事故受傷發生機率圖(不同分析方法間的比較)</h6>
+        <div class="dropdown no-arrow">
+          <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+            <div class="dropdown-header">功能</div>
+            <a class="dropdown-item save" href="#" data-canvas="injured-prob-areaChart" data-filename="意外事故受傷發生機率圖(不同分析方法間的比較)">保存圖檔</a>
+          </div>
+        </div>
+      </div>
+      <!-- Card Body -->
+      <div class="card-body">
+        <div class="chart-area">
+          <canvas id="injured-prob-areaChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $('#btn-evaluate').click(() => {
+    const input = [
+      Number($('#eval-sex option:selected').val()),
+      Number($('#eval-age option:selected').val()),
+      Number($('#eval-car-type option:selected').val()),
+      Number($('#eval-country option:selected').val()),
+      Number($('#eval-period option:selected').val())
+    ];
+
+    $.ajax({
+      type: 'POST',
+      url: '/calculateRisks',
+      dataType: 'JSON',
+      data: JSON.stringify({ input }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      beforeSend: () => $('#risk').show().text('評估中...'),
+      success: ({ probs, risks }) => {
+        const risk = parseFloat(risks * 100).toFixed(2);
+        $('#risk').show().html(`評估結果: <span style="color: red;">${risk}%</span>`);
+        $('#risk-prob').text(`${risk}%`);
+        $('#risk-bar').css('width', `${risk}%`);
+
+        if (risk >= 50) {
+          $('#risk-bar').removeClass('bg-info').addClass('bg-danger');
+        } else {
+          $('#risk-bar').removeClass('bg-danger').addClass('bg-info');
+        }
+        
+        renderChart([0, 1, 2, 3, 4, 5, 6, 7], probs);
+        fetchInjuredProbs();
+      }
+    });
+  });
+
+  $('a.save').click(function () {
+    download(document.getElementById($(this).attr('data-canvas')),
+      `${$(this).attr('data-filename')}.png`);
+  });
+
+  let riskChart = undefined;
+  function renderChart(labels, data) {
+    if (riskChart) {
+      riskChart.data.labels = labels;
+      riskChart.data.datasets[0].data = data[0];
+      riskChart.data.datasets[1].data = data[1];
+      riskChart.update();
+
+      return;
+    }
+
+    const ctx = document.getElementById('risk-prob-areaChart').getContext('2d');
+    riskChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: '死亡發生機率',
+            data: data[0],
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          },
+          {
+            label: '受傷發生機率',
+            data: data[1],
+            borderColor: 'rgba(192, 192, 192, 1)',
+            backgroundColor: 'rgba(192, 192, 192, 0.2)',
+          }
+        ]
+      },
+      options: {
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            left: 10,
+            right: 25,
+            bottom: 0
+          }
+        },
+        scales: {
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: '人數'
+            },
+            gridLines: {
+              drawBorder: false
+            }
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: '機率'
+            },
+            ticks: {
+              padding: 10
+            },
+            gridLines: {
+              color: 'rgb(234, 236, 244)',
+              zeroLineColor: 'rgb(234, 236, 244)',
+              drawBorder: false,
+              borderDash: [2],
+              zeroLineBorderDash: [2]
+            }
+          }],
+        },
+        tooltips: {
+          backgroundColor: 'rgb(255,255,255)',
+          bodyFontColor: '#858796',
+          titleMarginBottom: 10,
+          titleFontColor: '#6e707e',
+          titleFontSize: 14,
+          borderColor: '#dddfeb',
+          borderWidth: 1,
+          xPadding: 15,
+          yPadding: 15,
+          displayColors: false,
+          intersect: false,
+          mode: 'index',
+          caretPadding: 10,
+          callbacks: {
+            title: function (tooltipItem, chart) {
+              const datasetLabel = tooltipItem[0].xLabel || '0';
+              return datasetLabel + '個人';
+            },
+            label: function (tooltipItem, chart) {
+              const datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+              return datasetLabel + ': ' + parseFloat(tooltipItem.yLabel * 100).toFixed(2) + '%';
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function fetchInjuredProbs() {
+    const input = [
+      Number($('#eval-car-type option:selected').val()),
+      Number($('#eval-country option:selected').val()),
+      Number($('#eval-period option:selected').val())
+    ];
+
+    $.ajax({
+      type: 'POST',
+      url: '/calculateInjuredProbs',
+      dataType: 'JSON',
+      data: JSON.stringify({ input }),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      success: ({ probs }) => {
+        renderInjuredChart([0, 1, 2, 3, 4, 5, 6, 7], probs);
+      }
+    });
+  }
+  
+  let injuredChart = undefined;
+  function renderInjuredChart(labels, data) {
+    if (injuredChart) {
+      injuredChart.data.labels = labels;
+      injuredChart.data.datasets[0].data = data[0];
+      injuredChart.data.datasets[1].data = data[1];
+      injuredChart.data.datasets[2].data = data[2];
+      injuredChart.update();
+
+      return;
+    }
+
+    const ctx = document.getElementById('injured-prob-areaChart').getContext('2d');
+    injuredChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: '受傷發生機率(KNN)',
+            data: data[0],
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          },
+          {
+            label: '受傷發生機率(SVM)',
+            data: data[1],
+            borderColor: 'rgba(244, 224, 222, 1)',
+            backgroundColor: 'rgba(244, 224, 222, 0.2)',
+          },
+          {
+            label: '受傷發生機率(Muti-label)',
+            data: data[2],
+            borderColor: 'rgba(192, 192, 192, 1)',
+            backgroundColor: 'rgba(192, 192, 192, 0.2)',
+          },
+        ]
+      },
+      options: {
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            left: 10,
+            right: 25,
+            bottom: 0
+          }
+        },
+        scales: {
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: '人數'
+            },
+            gridLines: {
+              drawBorder: false
+            }
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: '機率'
+            },
+            ticks: {
+              padding: 10
+            },
+            gridLines: {
+              color: 'rgb(234, 236, 244)',
+              zeroLineColor: 'rgb(234, 236, 244)',
+              drawBorder: false,
+              borderDash: [2],
+              zeroLineBorderDash: [2]
+            }
+          }],
+        },
+        tooltips: {
+          backgroundColor: 'rgb(255,255,255)',
+          bodyFontColor: '#858796',
+          titleMarginBottom: 10,
+          titleFontColor: '#6e707e',
+          titleFontSize: 14,
+          borderColor: '#dddfeb',
+          borderWidth: 1,
+          xPadding: 15,
+          yPadding: 15,
+          displayColors: false,
+          intersect: false,
+          mode: 'index',
+          caretPadding: 10,
+          callbacks: {
+            title: function (tooltipItem, chart) {
+              const datasetLabel = tooltipItem[0].xLabel || '0';
+              return datasetLabel + '個人';
+            },
+            label: function (tooltipItem, chart) {
+              const datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+              return datasetLabel + ': ' + parseFloat(tooltipItem.yLabel * 100).toFixed(2) + '%';
+            }
+          }
+        }
+      }
+    });
+  }
+</script>
+{% endblock content%}

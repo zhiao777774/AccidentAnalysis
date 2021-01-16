@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block content%}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.1/bootstrap-table.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.1/bootstrap-table.min.js"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.18.1/locale/bootstrap-table-zh-TW.min.js"></script>
+
+<!-- DataTales Example -->
+<div class="card shadow mt-4 mb-4">
+  <div class="card-header py-3">
+    <h6 id="df-title" class="m-0 font-weight-bold text-primary" style="display: inline;">原始資料表格(僅顯示前10筆)</h6>
+    <div class="btn-group dropright" style="margin-left: 20px;">
+      <button id="btn-tma" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">TMA1</button>
+      <div id="select-tma" class="dropdown-menu">
+        <a class="dropdown-item" href="#">TMA1</a>
+        <a class="dropdown-item" href="#">TMA2</a>
+        <a class="dropdown-item" href="#">TMA3</a>
+      </div>
+    </div>
+    <div class="btn-group dropright" style="margin-left: 20px;">
+      <button id="btn-number" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown"
+        aria-haspopup="true" aria-expanded="false">100</button>
+      <div id="select-numbers" class="dropdown-menu">
+      </div>
+    </div>
+    <div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="radios-position" id="radio-head" value="head" checked>
+        <label class="form-check-label" for="radio-head">
+          head
+        </label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="radios-position" id="radio-tail" value="tail">
+        <label class="form-check-label" for="radio-tail">
+          tail
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive"></div>
+  </div>
+</div>
+
+<script>
+  /*
+  function htmlDecode(input) {
+    const e = document.createElement('div');
+    e.innerHTML = input;
+    return e.childNodes[0].nodeValue;
+  }
+  */
+
+  function decode(str) {
+    str = unescape(str.replace(/\\u/g, '%u'));
+    str = str.replace(/&#(x)?(\w+);/g, ($, $1, $2) => {
+      return String.fromCharCode(parseInt($2, $1 ? 16 : 10));
+    });
+
+    return str;
+  }
+
+  /*
+  const data = htmlDecode('{{ data }}').replace('[', '')
+    .replace(']', '').replaceAll('\'', '').split(',');
+  */
+  let data = '{{ data | tojson }}';
+  let dataNum = 100,
+    position = $('input[type=radio][name=radios-position]:checked').val();
+
+  $('#select-tma > a').click(function () {
+    // $('.table-responsive').html(data[$(this).index()]);
+    $.ajax({
+      url: `/table?data=${$(this).index()}&position=${position}`,
+      type: 'POST',
+      async: true,
+      beforeSend: () => {
+        $('#btn-tma').attr('disabled', true).text('載入中...');
+      },
+      success: (res) => {
+        data = JSON.parse(decode(res));
+        updateTable();
+        $('#select-numbers').empty();
+        [100, 1000, 5000, 10000].forEach((n) => {
+          if (data.data.length >= n) {
+            $('#select-numbers').append(`<a class="dropdown-item" href="#">${n}</a>`);
+            $('#select-numbers > a').click(function () {
+              dataNum = Number($(this).text());
+              updateTable();
+              $('#btn-number').text($(this).text());
+              $('#df-title').text(`原始資料表格(僅顯示${position == 'head' ? '前' : '後'}${dataNum}筆)`);
+            });
+          }
+        });
+
+        if (Number($('#btn-number').text()) > data.data.length) {
+          $('#select-numbers > a:last-child').click();
+        }
+
+        $('#btn-tma').attr('disabled', false).text($(this).text());
+        $('#df-title').text(`原始資料表格(僅顯示${position == 'head' ? '前' : '後'}${dataNum}筆)`);
+      }
+    });
+  });
+  $('#select-tma > a:nth-child(1)').click();
+
+  $('input[type=radio][name=radios-position]').change(function () {
+    position = this.value;
+    const dataSelected = $('#btn-tma').text();
+    $('#select-tma > a').each((i, el) => {
+      if ($(el).text() == dataSelected) {
+        $(el).click();
+        return false;
+      }
+    });
+  });
+
+  function updateTable() {
+    initTable(data.schema.fields.map(({ name }) => {
+      return {
+        field: name,
+        title: name,
+        sortable: true // !['經度', '緯度'].includes(name)
+      };
+    }), data.data.slice(0, dataNum));
+  }
+
+  function initTable(columns, data) {
+    $('.table-responsive').empty()
+      .append(`
+        <table id="tma-df" class="table table-bordered" 
+          data-sort-name="發生時間" data-sort-order="asc">
+        </table>
+      `);
+    $('#tma-df').bootstrapTable({
+      pagination: true,
+      pageSize: 10,
+      pageList: [10, 20, 50, 100],
+      columns,
+      data,
+    });
+  }
+</script>
+{% endblock content%}
